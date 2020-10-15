@@ -9,6 +9,14 @@ from .Metadata import getmetadata
 import warnings
 from .predict import predict_gen
 from django.contrib import messages
+
+from rest_framework.parsers import FileUploadParser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+
 warnings.simplefilter('ignore')
 
 class IndexView(ListView):
@@ -16,13 +24,14 @@ class IndexView(ListView):
     def get_queryset(self):
         return True
 
+@csrf_exempt
 def model_form_upload(request):
 
     documents = Document.objects.all()
     if request.method == 'POST':
         if len(request.FILES) == 0:
             messages.error(request,'Upload a file')
-            return redirect("predictor:index")
+            return HttpResponse({'genre':'error please upload a file'}, status=400)
 
         form = DocumentForm(request.POST, request.FILES)
         if form.is_valid():
@@ -31,16 +40,14 @@ def model_form_upload(request):
             print(uploadfile.size)
             if not uploadfile.name.endswith('.wav'):
                 messages.error(request,'Only .wav file type is allowed')
-                return redirect("predictor:index")
+                return HttpResponse({'genre':'error please upload a wav file'}, status=400)
             meta = getmetadata(uploadfile)
             
             genre = predict_gen(meta)
             print(genre)
 
             context = {'genre':genre}
-            return render(request,'music/result.html',context)
+            return HttpResponse(genre, status=200)
 
     else:
-        form = DocumentForm()
-
-    return render(request,'music/result.html',{'documents':documents,'form':form})
+        return HttpResponse({'genre':'error'}, status=400)
