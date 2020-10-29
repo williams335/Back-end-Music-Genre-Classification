@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.generic import ListView
 from .apps import PredictorConfig
@@ -16,6 +16,11 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+
+import librosa
+import os
+from pathlib import Path
+import simpleaudio as sa
 
 warnings.simplefilter('ignore')
 
@@ -40,14 +45,17 @@ def model_form_upload(request):
             print(uploadfile.size)
             if not uploadfile.name.endswith('.wav'):
                 messages.error(request,'Only .wav file type is allowed')
-                return HttpResponse({'genre':'error please upload a wav file'}, status=400)
+                return JsonResponse({'genre':'error please upload a wav file'}, status=400)
+
+            #uploadfile = uploadfile.read().decode('utf-8', 'replace')
+
+            #Audio_file = sa.WaveObject.from_wave_file(uploadfile)
             meta = getmetadata(uploadfile)
-            
             genre = predict_gen(meta)
             print(genre)
 
             context = {'genre':genre}
-            return HttpResponse(genre, status=200)
+            return JsonResponse({'genre':genre}, status=200)
 
     else:
-        return HttpResponse({'genre':'error'}, status=400)
+        return JsonResponse({'genre':'error'}, status=400)

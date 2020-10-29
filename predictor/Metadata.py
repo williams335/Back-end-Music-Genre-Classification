@@ -1,6 +1,8 @@
 
 import librosa
 import numpy as np
+import os
+from pathlib import Path
 def getmetadata(filename):
     
     y, sr = librosa.load(filename)
