@@ -50,8 +50,13 @@ def model_form_upload(request):
             #uploadfile = uploadfile.read().decode('utf-8', 'replace')
 
             #Audio_file = sa.WaveObject.from_wave_file(uploadfile)
-            meta = getmetadata(uploadfile)
-            genre = predict_gen(meta)
+
+
+            #meta = getmetadata(uploadfile)
+            #genre = predict_gen(meta)
+
+            genre = getmetadata(uploadfile)
+
             print(genre)
 
             context = {'genre':genre}
